@@ -6,19 +6,23 @@
 }
 
 :root {
-  --bg: #2E3532;
-  --surface: #424C48;
-  --surface-light: #424C48;
-  --primary: #8B2635;
-  --primary-hover: #c5354a;
-  --success: #D3EFBD;
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --text: #E0E2DB;
-  --text-muted: #b4b6af;
-  --radius: 14px;
+  --bg: #1c1917;
+  
+  --surface: #292524;
+  --surface-light: #3f3835;
+  
+  --primary: #c85a32;
+  --primary-hover: #df6942;
+  
+  --success: #84a98c;
+  --danger: #d9534f;
+  --warning: #d4a373;
+  
+  --text: #f5f2eb;
+  --text-muted: #a8a29e;
+  
+  --radius: 12px;
 }
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg);
