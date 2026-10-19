@@ -6,16 +6,16 @@
 }
 
 :root {
-  --bg: #FFCED8;
-  --surface: #FFDDDD;
-  --surface-light: #fff2f2;
-  --primary: #FFE8C4;
-  --primary-hover: #FFF4DE;
-  --success: #10b981;
+  --bg: #2E3532;
+  --surface: #424C48;
+  --surface-light: #424C48;
+  --primary: #8B2635;
+  --primary-hover: #c5354a;
+  --success: #D3EFBD;
   --danger: #ef4444;
   --warning: #f59e0b;
-  --text: #9a9a9a;
-  --text-muted: #94a3b8;
+  --text: #E0E2DB;
+  --text-muted: #b4b6af;
   --radius: 14px;
 }
 
