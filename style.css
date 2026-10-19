@@ -14,7 +14,7 @@
   --success: #10b981;
   --danger: #ef4444;
   --warning: #f59e0b;
-  --text: #f8fafc;
+  --text: #9a9a9a;
   --text-muted: #94a3b8;
   --radius: 14px;
 }
@@ -31,7 +31,7 @@ body {
 
 .app-container {
   width: 100%;
-  max-width:    ;
+  max-width: 480px ;
   padding: 16px;
   display: flex;
   flex-direction: column;
