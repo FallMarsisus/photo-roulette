@@ -86,7 +86,7 @@ function startAsHost() {
   roomCode = Math.floor(1000 + Math.random() * 9000).toString();
   isHost = true;
 
-  setStatus("Création du salon...");
+  setStatus("Creating room...");
   requestWakeLock();
 
   peer = new Peer(PEER_PREFIX + roomCode);
