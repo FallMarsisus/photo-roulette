@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PhotoRoulette P2P</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- PeerJS pour le WebRTC sans backend -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <!-- QRCode.js pour générer le QR Code du salon -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>📸 PhotoRoulette <span class="badge">P2P</span></h1>
+      <div id="connection-status" class="status-pill">Prêt</div>
+    </header>
+
+    <div id="host-warning" class="warning-banner hidden">
+      ⚠️ Tu es l'Hôte : ne verrouille pas ton écran et ne quitte pas cette page !
+    </div>
+
+    <!-- ÉCRAN 1 : ACCUEIL -->
+    <main id="screen-home" class="screen active">
+      <div class="card">
+        <label for="username-input">Ton pseudo</label>
+        <input type="text" id="username-input" placeholder="Ex: Alex" maxlength="16" autocomplete="off" />
+
+        <div class="divider"><span>Créer ou Rejoindre</span></div>
+
+        <button id="btn-create" class="btn btn-primary">Créer un salon (Hôte)</button>
+
+        <div class="join-row">
+          <input type="text" id="room-code-input" placeholder="Code à 4 chiffres" maxlength="4" inputmode="numeric" />
+          <button id="btn-join" class="btn btn-secondary">Rejoindre</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ÉCRAN 2 : LOBBY & SÉLECTION PHOTOS -->
+    <main id="screen-lobby" class="screen">
+      <div class="card lobby-info">
+        <div class="room-header">
+          <div>
+            <span class="muted">Code du salon</span>
+            <h2 id="display-room-code">----</h2>
+          </div>
+          <div id="qrcode-container"></div>
+        </div>
+        <p class="share-hint">Scanne le QR code ou entre le code sur les autres téléphones.</p>
+      </div>
+
+      <div class="card">
+        <h3>1. Ton sac à photos</h3>
+        <p class="muted">Sélectionne 15 à 50 photos à l'aveugle. <strong>3 photos</strong> seront tirées au sort et compressées sur ton téléphone.</p>
+        
+        <label for="photo-input" class="file-dropzone" id="dropzone-label">
+          <span id="photo-status-text">📁 Choisir mes photos en vrac</span>
+          <input type="file" id="photo-input" multiple accept="image/*" />
+        </label>
+      </div>
+
+      <div class="card">
+        <h3>2. Joueurs connectés (<span id="player-count">0</span>)</h3>
+        <ul id="player-list" class="player-list"></ul>
+      </div>
+
+      <div id="host-controls" class="host-controls hidden">
+        <div class="settings-row">
+          <label for="rounds-input">Nombre de manches :</label>
+          <input type="number" id="rounds-input" value="10" min="1" max="50" />
+        </div>
+        <button id="btn-start-game" class="btn btn-success" disabled>En attente des photos...</button>
+      </div>
+    </main>
+
+    <!-- ÉCRAN 3 : JEU (MANCHE EN COURS) -->
+    <main id="screen-game" class="screen">
+      <div class="game-top-bar">
+        <span id="round-indicator">Manche 1 / 10</span>
+        <span id="timer-display">8.0s</span>
+      </div>
+
+      <div class="timer-bar-wrapper">
+        <div id="timer-bar" class="timer-bar"></div>
+      </div>
+
+      <div class="photo-stage">
+        <div id="photo-loader" class="loader hidden">Synchronisation de la photo...</div>
+        <img id="game-photo" src="" alt="Photo mystère" class="hidden" />
+        <div id="reveal-banner" class="reveal-banner hidden"></div>
+      </div>
+
+      <div class="guess-section">
+        <p class="guess-prompt" id="guess-prompt">À qui appartient cette photo ?</p>
+        <div id="guess-buttons" class="guess-grid"></div>
+      </div>
+    </main>
+
+    <!-- ÉCRAN 4 : PODIUM FINAL -->
+    <main id="screen-results" class="screen">
+      <div class="card">
+        <h2>🏆 Classement Final</h2>
+        <ul id="leaderboard-list" class="leaderboard-list"></ul>
+        <button id="btn-replay" class="btn btn-primary hidden">Rejouer avec le même salon</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
