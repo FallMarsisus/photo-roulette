@@ -3,37 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>PhotoRoulette P2P</title>
+  <title>LibreRoulette</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- PeerJS pour le WebRTC sans backend -->
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <!-- QRCode.js pour générer le QR Code du salon -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
   <div class="app-container">
     <header>
-      <h1>📸 PhotoRoulette <span class="badge">P2P</span></h1>
+      <h1>📸 LibreRoulette</h1>
       <div id="connection-status" class="status-pill">Prêt</div>
     </header>
 
     <div id="host-warning" class="warning-banner hidden">
-      ⚠️ Tu es l'Hôte : ne verrouille pas ton écran et ne quitte pas cette page !
+      ⚠️ You are currently hosting, don't leave the page or the game will end!
     </div>
 
     <!-- ÉCRAN 1 : ACCUEIL -->
     <main id="screen-home" class="screen active">
       <div class="card">
-        <label for="username-input">Ton pseudo</label>
-        <input type="text" id="username-input" placeholder="Ex: Alex" maxlength="16" autocomplete="off" />
+        <label for="username-input">Your pseudo</label>
+        <input type="text" id="username-input" placeholder="Pseudo" maxlength="16" autocomplete="off" />
 
-        <div class="divider"><span>Créer ou Rejoindre</span></div>
+        <div class="divider"><span>Create or join</span></div>
 
-        <button id="btn-create" class="btn btn-primary">Créer un salon (Hôte)</button>
+        <button id="btn-create" class="btn btn-primary">Host Game</button>
 
         <div class="join-row">
-          <input type="text" id="room-code-input" placeholder="Code à 4 chiffres" maxlength="4" inputmode="numeric" />
-          <button id="btn-join" class="btn btn-secondary">Rejoindre</button>
+          <input type="text" id="room-code-input" placeholder="4-digit code" maxlength="4" inputmode="numeric" />
+          <button id="btn-join" class="btn btn-secondary">Join</button>
         </div>
       </div>
     </main>
@@ -43,42 +41,42 @@
       <div class="card lobby-info">
         <div class="room-header">
           <div>
-            <span class="muted">Code du salon</span>
+            <span class="muted">Room Code</span>
             <h2 id="display-room-code">----</h2>
           </div>
           <div id="qrcode-container"></div>
         </div>
-        <p class="share-hint">Scanne le QR code ou entre le code sur les autres téléphones.</p>
+        <p class="share-hint">Scan the code or enter it on the site on other devices</p>
       </div>
 
       <div class="card">
-        <h3>1. Ton sac à photos</h3>
-        <p class="muted">Sélectionne 15 à 50 photos à l'aveugle. <strong>3 photos</strong> seront tirées au sort et compressées sur ton téléphone.</p>
+        <h3>1. Your picture collection</h3>
+        <p class="muted">Select (randomly) around 20 pictures on your phone.</p>
         
         <label for="photo-input" class="file-dropzone" id="dropzone-label">
-          <span id="photo-status-text">📁 Choisir mes photos en vrac</span>
+          <span id="photo-status-text">📁 Send pictures</span>
           <input type="file" id="photo-input" multiple accept="image/*" />
         </label>
       </div>
 
       <div class="card">
-        <h3>2. Joueurs connectés (<span id="player-count">0</span>)</h3>
+        <h3>2. Player list (<span id="player-count">0</span>)</h3>
         <ul id="player-list" class="player-list"></ul>
       </div>
 
       <div id="host-controls" class="host-controls hidden">
         <div class="settings-row">
-          <label for="rounds-input">Nombre de manches :</label>
+          <label for="rounds-input">Number of rounds :</label>
           <input type="number" id="rounds-input" value="10" min="1" max="50" />
         </div>
-        <button id="btn-start-game" class="btn btn-success" disabled>En attente des photos...</button>
+        <button id="btn-start-game" class="btn btn-success" disabled>Waiting for players...</button>
       </div>
     </main>
 
     <!-- ÉCRAN 3 : JEU (MANCHE EN COURS) -->
     <main id="screen-game" class="screen">
       <div class="game-top-bar">
-        <span id="round-indicator">Manche 1 / 10</span>
+        <span id="round-indicator">Round 1 / 10</span>
         <span id="timer-display">8.0s</span>
       </div>
 
@@ -87,13 +85,13 @@
       </div>
 
       <div class="photo-stage">
-        <div id="photo-loader" class="loader hidden">Synchronisation de la photo...</div>
-        <img id="game-photo" src="" alt="Photo mystère" class="hidden" />
+        <div id="photo-loader" class="loader hidden">Synching picture...</div>
+        <img id="game-photo" src="" alt="Mystery picture" class="hidden" />
         <div id="reveal-banner" class="reveal-banner hidden"></div>
       </div>
 
       <div class="guess-section">
-        <p class="guess-prompt" id="guess-prompt">À qui appartient cette photo ?</p>
+        <p class="guess-prompt" id="guess-prompt"></p>
         <div id="guess-buttons" class="guess-grid"></div>
       </div>
     </main>
@@ -101,9 +99,9 @@
     <!-- ÉCRAN 4 : PODIUM FINAL -->
     <main id="screen-results" class="screen">
       <div class="card">
-        <h2>🏆 Classement Final</h2>
+        <h2>🏆 Final Scores</h2>
         <ul id="leaderboard-list" class="leaderboard-list"></ul>
-        <button id="btn-replay" class="btn btn-primary hidden">Rejouer avec le même salon</button>
+        <button id="btn-replay" class="btn btn-primary hidden">Play again</button>
       </div>
     </main>
   </div>

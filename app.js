@@ -1,11 +1,11 @@
 // ==========================================
 // CONFIGURATION & ÉTAT GLOBAL
 // ==========================================
-const PEER_PREFIX = "photoroulette-p2p-";
-const PHOTOS_PER_PLAYER = 3;
+const PEER_PREFIX = "libreroulette-";
+const PHOTOS_PER_PLAYER = 5;
 const MAX_IMAGE_DIMENSION = 720; // Garde les fichiers sous ~50Ko pour WebRTC
 const JPEG_QUALITY = 0.6;
-const ROUND_TIME_MS = 8000;
+const ROUND_TIME_MS = 5000;
 
 let peer = null;
 let isHost = false;
@@ -81,7 +81,7 @@ function showScreen(screenId) {
 // 1. LOGIQUE HÔTE (SERVEUR DANS LE NAVIGATEUR)
 // ==========================================
 function startAsHost() {
-  myName = document.getElementById("username-input").value.trim() || "Hôte";
+  myName = document.getElementById("username-input").value.trim() || "Host";
   localStorage.setItem("pr_username", myName);
   roomCode = Math.floor(1000 + Math.random() * 9000).toString();
   isHost = true;
@@ -93,7 +93,7 @@ function startAsHost() {
 
   peer.on("open", (id) => {
     myId = id;
-    setStatus("Hôte actif");
+    setStatus("Hosting");
     document.getElementById("host-warning").classList.remove("hidden");
     document.getElementById("host-controls").classList.remove("hidden");
 
@@ -128,8 +128,8 @@ function startAsHost() {
   });
 
   peer.on("error", (err) => {
-    alert("Erreur réseau P2P : " + err.type);
-    setStatus("Erreur");
+    alert("P2P Error: " + err.type);
+    setStatus("Error");
   });
 }
 
@@ -147,12 +147,11 @@ function handleHostIncomingData(peerId, data) {
       break;
 
     case "UPLOAD_PHOTOS":
-      // Supprimer les anciennes photos de ce joueur s'il en renvoie
       hostState.photoPool = hostState.photoPool.filter((p) => p.ownerId !== peerId);
       data.photos.forEach((dataUrl) => {
         hostState.photoPool.push({
           ownerId: peerId,
-          ownerName: hostState.players[peerId]?.name || "Joueur",
+          ownerName: hostState.players[peerId]?.name || "Player",
           dataUrl
         });
       });
@@ -175,7 +174,6 @@ function handleHostIncomingData(peerId, data) {
           guessedOwnerId: data.guessedOwnerId,
           timeMs: elapsed
         };
-        // Si tout le monde a répondu avant la fin du chrono, on termine la manche
         if (Object.keys(hostState.roundAnswers).length >= Object.keys(hostState.players).length) {
           clearTimeout(hostState.roundTimer);
           hostEndRound();
@@ -189,7 +187,6 @@ function broadcast(payload) {
   Object.values(hostState.connections).forEach((conn) => {
     if (conn.open) conn.send(payload);
   });
-  // L'hôte traite aussi l'événement pour sa propre interface
   handleClientIncomingData(payload);
 }
 
@@ -206,8 +203,8 @@ function broadcastLobbyState() {
   const startBtn = document.getElementById("btn-start-game");
   startBtn.disabled = !allReady;
   startBtn.textContent = allReady
-    ? `Lancer la partie (${hostState.photoPool.length} photos en jeu)`
-    : "En attente des photos de tous les joueurs...";
+    ? `Start game with (${hostState.photoPool.length} photos.)`
+    : "Waiting for pictures...";
 }
 
 // ==========================================
@@ -224,7 +221,7 @@ function startAsClient() {
   }
 
   isHost = false;
-  setStatus("Connexion à l'hôte...");
+  setStatus("Connecting to room " + roomCode + "...");
   requestWakeLock();
 
   peer = new Peer();
@@ -244,7 +241,7 @@ function startAsClient() {
     });
 
     hostConn.on("close", () => {
-      alert("L'hôte a quitté ou verrouillé son téléphone. Partie interrompue.");
+      alert("The host left, game is over.");
       window.location.reload();
     });
   });
@@ -272,7 +269,7 @@ async function handlePhotoSelection(event) {
 
   const statusText = document.getElementById("photo-status-text");
   const dropzone = document.getElementById("dropzone-label");
-  statusText.textContent = "🎲 Tirage au sort et compression en cours...";
+  statusText.textContent = "Sending...";
 
   // Mélange de Fisher-Yates et sélection de N photos au hasard
   for (let i = files.length - 1; i > 0; i--) {
@@ -294,10 +291,10 @@ async function handlePhotoSelection(event) {
     });
 
     dropzone.classList.add("done");
-    statusText.textContent = `✅ ${compressedDataUrls.length} photos secrètes envoyées ! (Cliquer pour re-tirer)`;
+    statusText.textContent = `✅ ${compressedDataUrls.length} pictures sent ! (Click to change)`;
   } catch (err) {
     console.error(err);
-    statusText.textContent = "❌ Erreur avec une image (format non supporté). Réessaie.";
+    statusText.textContent = "❌ Error, unsupported format, try again.";
   }
 }
 
@@ -468,7 +465,7 @@ function handleClientIncomingData(data) {
         li.innerHTML = `
           <span>${p.name}</span>
           <span class="ready-badge ${p.ready ? "yes" : "no"}">
-            ${p.ready ? `Prêt (${p.photoCount} 📸)` : "Choisit..."}
+            ${p.ready ? `Ready (${p.photoCount} 📸)` : "Choosing..."}
           </span>
         `;
         listEl.appendChild(li);
@@ -484,7 +481,7 @@ function handleClientIncomingData(data) {
       document.getElementById("round-indicator").textContent =
         `Manche ${data.roundNumber} / ${data.totalRounds}`;
       document.getElementById("reveal-banner").classList.add("hidden");
-      document.getElementById("guess-prompt").textContent = "À qui appartient cette photo ?";
+      document.getElementById("guess-prompt").textContent = ""; // a qui appartient cette photo ?
 
       const img = document.getElementById("game-photo");
       const loader = document.getElementById("photo-loader");
@@ -508,7 +505,7 @@ function handleClientIncomingData(data) {
     case "ROUND_REVEAL":
       clearInterval(clientTimerInterval);
       const banner = document.getElementById("reveal-banner");
-      banner.textContent = `📸 C'était la photo de ${data.ownerName} !`;
+      banner.textContent = `📸 ${data.ownerName} !`;
       banner.classList.remove("hidden");
 
       document.querySelectorAll(".guess-btn").forEach((btn) => {
@@ -561,7 +558,7 @@ function renderGuessButtons(players) {
       hasGuessedThisRound = true;
       currentSelectedGuess = p.id;
       btn.classList.add("selected");
-      document.getElementById("guess-prompt").textContent = "Réponse envoyée ! En attente des autres...";
+      document.getElementById("guess-prompt").textContent = "Answer submitted! Waiting for results...";
       sendToHost({
         type: "SUBMIT_GUESS",
         guessedOwnerId: p.id
