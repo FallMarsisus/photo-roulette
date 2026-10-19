@@ -2,7 +2,7 @@
 // CONFIGURATION & ÉTAT GLOBAL
 // ==========================================
 const PEER_PREFIX = "libreroulette-";
-const PHOTOS_PER_PLAYER = 5;
+const PHOTOS_PER_PLAYER = 3;
 const MAX_IMAGE_DIMENSION = 720; // Garde les fichiers sous ~50Ko pour WebRTC
 const JPEG_QUALITY = 0.6;
 const ROUND_TIME_MS = 5000;
@@ -271,12 +271,13 @@ async function handlePhotoSelection(event) {
   const dropzone = document.getElementById("dropzone-label");
   statusText.textContent = "Sending...";
 
-  // Mélange de Fisher-Yates et sélection de N photos au hasard
   for (let i = files.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [files[i], files[j]] = [files[j], files[i]];
   }
-  const pickedFiles = files.slice(0, PHOTOS_PER_PLAYER);
+
+  const photosToSend = files.length/5 > 1 ? files.length/5 > 1 : PHOTOS_PER_PLAYER;
+  const pickedFiles = files.slice(0, photosToSend);
 
   try {
     const compressedDataUrls = [];
